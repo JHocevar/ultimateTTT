@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://github.com/kikster500/my-app.git",
+  "homepage": ".",
   "dependencies": {
     "bootstrap": "^4.4.1",
     "npm-git-install": "^0.3.0",

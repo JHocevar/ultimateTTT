@@ -21,6 +21,9 @@ class App extends React.Component {
   }
 
   randomPlay() {
+    if (this.state.winner) {
+      return; // Dont try to make a move if there is already a winner
+    }
     const validMoves = this.getValidMoves();
     const move = validMoves[Math.floor(Math.random() * validMoves.length)];
     if (this.state.useAi && !this.state.xIsNext) {
@@ -90,6 +93,10 @@ class App extends React.Component {
     const boards = this.state.boards;
     const currBoard = this.state.currentBoard;
     let validMoves = [];
+    if (this.state.winner) {
+      return; // There are no valid moves if there is a winner
+    }
+
     if (currBoard === -1) {
       // We can choose any board to play on
       for (let boardNum = 0; boardNum < 9; boardNum++) {
