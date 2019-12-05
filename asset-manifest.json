@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/kikster500/ReactTTT/static/css/main.a9f06c2a.chunk.css",
+    "main.js": "/kikster500/ReactTTT/static/js/main.62afac02.chunk.js",
+    "main.js.map": "/kikster500/ReactTTT/static/js/main.62afac02.chunk.js.map",
+    "runtime-main.js": "/kikster500/ReactTTT/static/js/runtime-main.ccc44410.js",
+    "runtime-main.js.map": "/kikster500/ReactTTT/static/js/runtime-main.ccc44410.js.map",
+    "static/css/2.64a99b10.chunk.css": "/kikster500/ReactTTT/static/css/2.64a99b10.chunk.css",
+    "static/js/2.3a81513c.chunk.js": "/kikster500/ReactTTT/static/js/2.3a81513c.chunk.js",
+    "static/js/2.3a81513c.chunk.js.map": "/kikster500/ReactTTT/static/js/2.3a81513c.chunk.js.map",
+    "index.html": "/kikster500/ReactTTT/index.html",
+    "precache-manifest.fdfc9445e0870e9d7e74adb396fbbe5e.js": "/kikster500/ReactTTT/precache-manifest.fdfc9445e0870e9d7e74adb396fbbe5e.js",
+    "service-worker.js": "/kikster500/ReactTTT/service-worker.js",
+    "static/css/2.64a99b10.chunk.css.map": "/kikster500/ReactTTT/static/css/2.64a99b10.chunk.css.map",
+    "static/css/main.a9f06c2a.chunk.css.map": "/kikster500/ReactTTT/static/css/main.a9f06c2a.chunk.css.map"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.ccc44410.js",
+    "static/css/2.64a99b10.chunk.css",
+    "static/js/2.3a81513c.chunk.js",
+    "static/css/main.a9f06c2a.chunk.css",
+    "static/js/main.62afac02.chunk.js"
+  ]
+}
