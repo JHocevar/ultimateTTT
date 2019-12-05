@@ -1,0 +1,47 @@
+.board {
+  padding: 10px;
+}
+
+.super-board-row {
+  display: inline-table;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.square {
+  background: inherit;
+  border: 1px solid #999;
+  float: left;
+  font-size: 300%;
+  font-weight: bold;
+  text-align: center;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.square:focus {
+  outline: none;
+}
+
+.winner-x {
+  background: rgba(172, 73, 73, 0.801);
+  border: 1px solid black;
+}
+
+.winner-o {
+  background: rgba(36, 36, 158, 0.644);
+  border: 1px solid black;
+}
+
+.valid {
+  background: rgba(124, 136, 241, 0.425);
+}
+
+.game {
+  display: block;
+  text-align: center;
+}
