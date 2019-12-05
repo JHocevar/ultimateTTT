@@ -16,35 +16,59 @@ class App extends React.Component {
       xIsNext: true,
       currentBoard: -1,
       winner: null,
-      useAi: true
+      selectedState: "randomAI" // Options -- randomAI players paused
     };
   }
 
+  initializeState() {
+    let boards = Array(9).fill(null);
+    for (let i = 0; i < 9; i++) {
+      boards[i] = Array(9).fill(null);
+    }
+    this.setState({
+      boards: boards,
+      winners: Array(9).fill(null),
+      xIsNext: true,
+      currentBoard: -1,
+      winner: null,
+      selectedState: "randomAI" // Options -- randomAI players paused
+    });
+  }
+
   randomPlay() {
-    if (this.state.winner) {
+    if (this.state.winner || this.state.selectedState === "players") {
       return; // Dont try to make a move if there is already a winner
     }
     const validMoves = this.getValidMoves();
     const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-    if (this.state.useAi && !this.state.xIsNext) {
+    if (this.state.selectedState === "randomAI" && !this.state.xIsNext) {
       this.makeMove(move[0], move[1]);
     }
   }
 
   handleClick = (board, square) => {
-    if (this.state.useAi && !this.state.xIsNext) {
+    if (this.state.selectedState === "randomAI" && !this.state.xIsNext) {
       return;
     }
     this.makeMove(board, square);
+  };
+
+  handleChange = event => {
+    this.setState({ selectedState: event.target.value });
+  };
+
+  handleReset = () => {
+    console.log("Resetting");
+    this.initializeState();
   };
 
   makeMove(board, square) {
     const boards = this.state.boards.slice();
     const winners = this.state.winners.slice();
     let currBoard = this.state.currentBoard;
-    if (calculateWinner(winners)) {
+    if (calculateWinner(winners) || this.state.selectedState === "paused") {
       // If there is a winner, dont accept clicks
-      // If AI is active, dont accept clicks for 'O'
+      // If the game is paused by user, dont accept moves
       return;
     }
 
@@ -138,7 +162,11 @@ class App extends React.Component {
     return (
       <React.Fragment>
         <TitleBar winner={this.state.winner} xIsNext={this.state.xIsNext} />
-        <SideBar />
+        <SideBar
+          selectedState={this.state.selectedState}
+          onChange={this.handleChange}
+          onReset={this.handleReset}
+        />
         <div className="game">
           <Game
             onClick={this.handleClick}
