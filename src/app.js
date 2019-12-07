@@ -241,10 +241,10 @@ class App extends React.Component {
       } else if (winner === "O") {
         this.setState({ numWinsO: this.state.numWinsO + 1 });
       }
-    }
-    this.setState({ numSims: this.state.numSims + 1 });
+      this.setState({ numSims: this.state.numSims + 1 });
 
-    this.initializeState(); // Reset the board
+      this.initializeState(); // Reset the board
+    }
   }
 
   componentDidUpdate() {
