@@ -6,6 +6,8 @@ class TitleBar extends React.Component {
     let status;
     if (winner) {
       status = "The winner is " + winner + "!";
+    } else if (this.props.currentBoard === -2) {
+      status = "The game was a tie";
     } else {
       status = "Current Player: " + (this.props.xIsNext ? "X" : "O");
     }

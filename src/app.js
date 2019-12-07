@@ -2,10 +2,13 @@ import React from "react";
 import Game from "./components/Game";
 import SideBar from "./components/SideBar";
 import TitleBar from "./components/TitleBar";
+import MonteCarloTreeSearch from "./MonteCarloTreeSearch";
+import GameState from "./GameState";
 
 class App extends React.Component {
   constructor() {
     super();
+    this.MCSearch = new MonteCarloTreeSearch();
     let boards = Array(9).fill(null);
     for (let i = 0; i < 9; i++) {
       boards[i] = Array(9).fill(null);
@@ -16,7 +19,12 @@ class App extends React.Component {
       xIsNext: true,
       currentBoard: -1,
       winner: null,
-      selectedState: "randomAI" // Options -- randomAI players paused
+      selectedState: "randomAI", // Options -- randomAI players smartAI simulate
+      simulationMode: 1, // 1 - Random v Random  2 - Smart v Random
+      paused: false,
+      numSims: 0,
+      numWinsX: 0,
+      numWinsO: 0
     };
   }
 
@@ -31,23 +39,55 @@ class App extends React.Component {
       xIsNext: true,
       currentBoard: -1,
       winner: null,
-      selectedState: "randomAI" // Options -- randomAI players paused
+      // selectedState: "randomAI", // Options -- randomAI players smartAI simulate
+      // simulationMode: 1, // 1 - Random v Random  2 - Smart v Random
+      paused: false
     });
+    this.MCSearch = new MonteCarloTreeSearch(); // Reset the game tree to clear up memory
   }
 
   randomPlay() {
-    if (this.state.winner || this.state.selectedState === "players") {
+    const mode = this.state.selectedState;
+    if (this.state.winner || mode === "players" || mode === "smartAI") {
       return; // Dont try to make a move if there is already a winner
     }
     const validMoves = this.getValidMoves();
+    if (validMoves.length === 0) return; // We cannot make a move if there are no valid moves
     const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-    if (this.state.selectedState === "randomAI" && !this.state.xIsNext) {
+    if (
+      (mode === "randomAI" && !this.state.xIsNext) ||
+      (mode === "simulate" &&
+        (this.state.simulationMode === 1 || !this.state.xIsNext))
+    ) {
+      this.makeMove(move[0], move[1]);
+    }
+  }
+
+  smartPlay() {
+    const mode = this.state.selectedState;
+    if (
+      this.state.winner ||
+      mode === "players" ||
+      mode === "randomAI" ||
+      this.state.paused
+    ) {
+      return; // Dont try to make a move if ther is already a winner
+    }
+    if (
+      (this.state.xIsNext &&
+        mode === "simulate" &&
+        this.state.simulationMode === 2) ||
+      (mode === "smartAI" && !this.xIsNext)
+    ) {
+      let clonedGame = new GameState(this.state);
+      this.MCSearch.runSearch(clonedGame); // Pass a clone of yourself
+      let move = this.MCSearch.getBestMove(clonedGame);
       this.makeMove(move[0], move[1]);
     }
   }
 
   handleClick = (board, square) => {
-    if (this.state.selectedState === "randomAI" && !this.state.xIsNext) {
+    if (this.state.selectedState !== "players" && !this.state.xIsNext) {
       return;
     }
     this.makeMove(board, square);
@@ -57,16 +97,32 @@ class App extends React.Component {
     this.setState({ selectedState: event.target.value });
   };
 
+  handleOptionChange = event => {
+    this.setState({ simulationMode: parseInt(event.target.value) });
+  };
+
   handleReset = () => {
-    console.log("Resetting");
     this.initializeState();
+  };
+
+  handleStatReset = () => {
+    console.log("resetting simulations");
+    this.setState({
+      numSims: 0,
+      numWinsX: 0,
+      numWinsO: 0
+    });
+  };
+
+  handlePause = () => {
+    this.setState({ paused: !this.state.paused });
   };
 
   makeMove(board, square) {
     const boards = this.state.boards.slice();
     const winners = this.state.winners.slice();
     let currBoard = this.state.currentBoard;
-    if (calculateWinner(winners) || this.state.selectedState === "paused") {
+    if (calculateWinner(winners) || this.currentBoard === -2) {
       // If there is a winner, dont accept clicks
       // If the game is paused by user, dont accept moves
       return;
@@ -113,6 +169,15 @@ class App extends React.Component {
     return true;
   }
 
+  isAllFull() {
+    for (let i = 0; i < 9; i++) {
+      if (!this.isBoardFull(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   getValidMoves() {
     const boards = this.state.boards;
     const currBoard = this.state.currentBoard;
@@ -131,6 +196,7 @@ class App extends React.Component {
         }
       }
     } else {
+      if (currBoard === -2) return []; // There are no valid moves if the board is -2
       for (let squareNum = 0; squareNum < 9; squareNum++) {
         if (!boards[currBoard][squareNum]) {
           validMoves.push([currBoard, squareNum]);
@@ -145,27 +211,74 @@ class App extends React.Component {
     if (winner && this.state.currentBoard !== -2) {
       // If we have a winner, and we havnet updated the currentBoard yet
       this.setState({
-        winner: winner
+        winner: winner,
+        currentBoard: -2
       });
+    }
+
+    if (this.isAllFull() && this.state.currentBoard !== -2) {
       this.setState({
         currentBoard: -2
       });
     }
+
+    if (this.state.currentBoard !== -2) {
+      for (let i = 0; i < 9; i++) {
+        if (!this.state.winners[i] && !this.isBoardFull(i)) {
+          return;
+        }
+      }
+      this.setState({
+        currentBoard: -2
+      });
+    }
+
+    // Reset the board and clear the game tree when a simulation is finished
+    if (this.state.selectedState === "simulate") {
+      // We are running simulations, reset the board
+      if (winner === "X") {
+        this.setState({ numWinsX: this.state.numWinsX + 1 });
+      } else if (winner === "O") {
+        this.setState({ numWinsO: this.state.numWinsO + 1 });
+      }
+    }
+    this.setState({ numSims: this.state.numSims + 1 });
+
+    this.initializeState(); // Reset the board
   }
 
   componentDidUpdate() {
     this.updateWinner();
-    this.randomPlay();
+  }
+
+  componentDidMount() {
+    setInterval(() => {
+      if (this.state.paused) return;
+      this.smartPlay();
+      this.randomPlay();
+    }, 1);
   }
 
   render() {
     return (
-      <React.Fragment>
-        <TitleBar winner={this.state.winner} xIsNext={this.state.xIsNext} />
+      <div className="app">
+        <TitleBar
+          winner={this.state.winner}
+          xIsNext={this.state.xIsNext}
+          currentBoard={this.state.currentBoard}
+        />
         <SideBar
           selectedState={this.state.selectedState}
           onChange={this.handleChange}
+          onOptionChange={this.handleOptionChange}
           onReset={this.handleReset}
+          onPause={this.handlePause}
+          onStatReset={this.handleStatReset}
+          simulationMode={this.state.simulationMode}
+          paused={this.state.paused}
+          numSims={this.state.numSims}
+          numWinsX={this.state.numWinsX}
+          numWinsO={this.state.numWinsO}
         />
         <div className="game">
           <Game
@@ -177,14 +290,14 @@ class App extends React.Component {
             winner={this.state.winner}
           />
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }
 
 export default App;
 
-function calculateWinner(squares) {
+export function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
