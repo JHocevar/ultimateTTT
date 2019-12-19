@@ -77,7 +77,7 @@ class App extends React.Component {
       (this.state.xIsNext &&
         mode === "simulate" &&
         this.state.simulationMode === 2) ||
-      (mode === "smartAI" && !this.xIsNext)
+      (mode === "smartAI" && !this.state.xIsNext)
     ) {
       let clonedGame = new GameState(this.state);
       this.MCSearch.runSearch(clonedGame); // Pass a clone of yourself
